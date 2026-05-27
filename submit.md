@@ -75,3 +75,37 @@ Answer:
 ### 10. Test helper for signing in
 
 - **Edit:** [`test/test_helper.rb`](test/test_helper.rb) — add a helper e.g. `sign_in_as(user)` that posts to session create or sets `session[:user_id]` in integration tests.
+
+### Agent Mode:
+Prompt: Can you implement the first step:
+Commit: [link](https://github.com/NU-CS-Software-Studio-Spring-26/nu-cs-software-studio-spring-26-homework-5-hw5/commit/b107bce12be520cdaefdfef1c76298a9c1fac316) to commit
+
+### Bad -> Good Prompt rewrite:
+
+Bad: "Fix the bug in todos"
+
+Good:
+
+1. Context:
+   - Create/update flow: [`app/controllers/todos_controller.rb`](app/controllers/todos_controller.rb) (`create` 22–35, `update` 37–47, `todo_params` 74–76).
+   - Form: [`app/views/todos/_form.html.erb`](app/views/todos/_form.html.erb) (only `description` today).
+   - Show partial: [`app/views/todos/_todo.html.erb`](app/views/todos/_todo.html.erb).
+   - JSON: [`app/views/todos/_todo.json.jbuilder`](app/views/todos/_todo.json.jbuilder).
+   - Tests: [`test/controllers/todos_controller_test.rb`](test/controllers/todos_controller_test.rb), [`test/system/todos_test.rb`](test/system/todos_test.rb).
+
+2. Task:
+   Wire `due_date` through the existing HTML create/edit flow: add a due-date field to the form, permit it in strong parameters, and display it on the todo show page. Do not add new migrations—the column already exists.
+
+3. Expected vs. actual:
+   - Expected: On `/todos/new`, I set description and a due date, submit, and the show page lists both fields; `Todo.last.due_date` is set in the console.
+   - Actual: The new/edit form has no due-date input ([`_form.html.erb`](app/views/todos/_form.html.erb) lines 14–17). `todo_params` only allows `:description` ([`todos_controller.rb`](app/controllers/todos_controller.rb) line 75), so even a manual POST with `todo[due_date]` is rejected. The show partial only renders description ([`_todo.html.erb`](app/views/todos/_todo.html.erb) lines 3–6). No error is raised—the value is silently dropped.
+
+4. Constraints:
+   - May edit: `todos_controller.rb`, `_form.html.erb`, `_todo.html.erb`, `_todo.json.jbuilder`, controller/system tests, `test/fixtures/todos.yml` if needed.
+   - Do not edit `db/schema.rb` directly; no new gems; follow strong parameters (do not disable mass-assignment protection).
+   - Match existing patterns: `form_with`, `params.expect`, HTML + JSON responses, Minitest.
+
+5. Done when:
+   - New test in [`test/controllers/todos_controller_test.rb`](test/controllers/todos_controller_test.rb): `post todos_url` with `due_date` present → `assert_equal` on `Todo.last.due_date` after redirect.
+   - Updated [`test/system/todos_test.rb`](test/system/todos_test.rb) `should create todo`: fill in due date, assert due date visible on show page after create.
+   - `bin/rails test` and the updated system test pass.
