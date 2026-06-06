@@ -1,9 +1,14 @@
+# app/controllers/todos_controller.rb
 class TodosController < ApplicationController
   before_action :set_todo, only: %i[ show edit update destroy toggle_priority ]
 
   # GET /todos or /todos.json
   def index
-    @todos = Todo.all
+    if params[:category].present?
+      @todos = Todo.with_category(params[:category])
+    else
+      @todos = Todo.all
+    end
   end
 
   # GET /todos/1 or /todos/1.json
@@ -75,13 +80,11 @@ class TodosController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
     def set_todo
       @todo = Todo.find(params.expect(:id))
     end
 
-    # Only allow a list of trusted parameters through.
     def todo_params
-      params.expect(todo: [ :description ])
+      params.expect(todo: [ :description, :category ])
     end
 end

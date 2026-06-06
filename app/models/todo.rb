@@ -1,2 +1,3 @@
 class Todo < ApplicationRecord
-end
+    scope :with_category, ->(category) { where(category: category) }
+  end
